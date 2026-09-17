@@ -1,4 +1,4 @@
-# quant-finance-project
+# quantfinance project
 
 ## Structure
 
@@ -25,4 +25,4 @@ python part2_frontier.py           # Project 2: tangency, MVP, and the frontier
 ```
 
 `part1a_portfolios.py` downloads and caches the 30-stock + benchmark + risk-free
-price panel on first run; every later script reuses that cache.
+price panel on first run.
