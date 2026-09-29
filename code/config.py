@@ -57,6 +57,13 @@ RISK_FREE_TICKER = "BIL"     # SPDR 1-3 Month T-Bill ETF, used as a risk-free pr
                               # recurring issue, not specific to this project.)
 
 # ---------------------------------------------------------------------------
+# Factor model (Project 3): Ken French Data Library, daily frequency
+#   "Fama/French 5 Factors (2x3) [Daily]"  -> Mkt-RF, SMB, HML, RMW, CMA, RF
+#   "Momentum Factor (Mom) [Daily]"        -> Mom
+# ---------------------------------------------------------------------------
+FACTOR_NAMES = ["Mkt-RF", "SMB", "HML", "RMW", "CMA", "Mom"]
+
+# ---------------------------------------------------------------------------
 # File paths (relative to the project root, one level above code/)
 # ---------------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -71,3 +78,4 @@ for _d in [DATA_RAW_DIR, DATA_PROCESSED_DIR, OUTPUT_FIGURES_DIR, OUTPUT_TABLES_D
 
 PRICES_CACHE = DATA_RAW_DIR / "sp500_daily_2016_2025.csv"
 SHARES_CACHE = DATA_RAW_DIR / "shares_outstanding.csv"
+FACTORS_CACHE = DATA_RAW_DIR / "ff_factors_daily_2016_2025.csv"

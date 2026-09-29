@@ -15,7 +15,7 @@ import yfinance as yf
 from config import (
     TICKERS, START_DATE, END_DATE,
     BENCHMARK_TICKER, RISK_FREE_TICKER,
-    PRICES_CACHE, SHARES_CACHE,
+    PRICES_CACHE, SHARES_CACHE, FACTORS_CACHE,
 )
 
 
@@ -77,6 +77,51 @@ def download_shares_outstanding(force=False):
     shares.to_csv(SHARES_CACHE)
     print(f"Saved shares-outstanding cache to {SHARES_CACHE}")
     return shares
+
+
+def download_factors(force=False):
+    """
+    Download daily Fama/French 5 factors + momentum from the Ken French Data
+    Library (via pandas-datareader) for the full sample window. Caches to
+    CSV; set force=True to re-download even if a cache already exists.
+
+    Source files (Ken French Data Library):
+      "Fama/French 5 Factors (2x3) [Daily]" -> Mkt-RF, SMB, HML, RMW, CMA, RF
+      "Momentum Factor (Mom) [Daily]"       -> Mom
+
+    Ken French's files report returns in PERCENT (e.g. 0.05 means 0.05%),
+    so everything is divided by 100 here to match the decimal stock returns
+    used everywhere else in this project.
+    """
+    if FACTORS_CACHE.exists() and not force:
+        return pd.read_csv(FACTORS_CACHE, index_col=0, parse_dates=True)
+
+    import pandas_datareader.data as web
+
+    print("Downloading Fama/French 5 factors + momentum (daily) from the "
+          "Ken French Data Library...")
+
+    ff5 = web.DataReader(
+        "F-F_Research_Data_5_Factors_2x3_daily", "famafrench",
+        start=START_DATE, end=END_DATE,
+    )[0]
+    mom = web.DataReader(
+        "F-F_Momentum_Factor_daily", "famafrench",
+        start=START_DATE, end=END_DATE,
+    )[0]
+
+    # pandas-datareader labels daily Ken French series with plain dates, but
+    # normalize defensively in case a PeriodIndex slips through.
+    ff5.index = pd.to_datetime(ff5.index.astype(str))
+    mom.index = pd.to_datetime(mom.index.astype(str))
+
+    ff5.columns = [c.strip() for c in ff5.columns]
+    mom.columns = [c.strip() for c in mom.columns]
+
+    factors = ff5.join(mom, how="inner") / 100.0   # percent -> decimal
+    factors.to_csv(FACTORS_CACHE)
+    print(f"Saved factor cache to {FACTORS_CACHE}")
+    return factors
 
 
 def compute_returns(prices):
